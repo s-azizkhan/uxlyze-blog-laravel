@@ -5,7 +5,6 @@
 
 @layer components {
     .text-secondary {
-        @apply text-indigo-600;
         font-family: 'Space Grotesk', sans-serif;
     }
 }
