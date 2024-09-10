@@ -35,7 +35,7 @@
                         <span>{{ $blog->category }}</span>
                     </div>
                     <div class="prose max-w-none text-secondary">
-                        {!! $blog->content !!}
+                        {!! Str::markdown($blog->content) !!}
                     </div>
                 </div>
             </div>
