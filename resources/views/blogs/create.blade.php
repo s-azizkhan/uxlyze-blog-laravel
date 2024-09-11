@@ -1,3 +1,8 @@
+{{-- Update the metadata --}}
+@php
+    seo()->title('Create Blog Post | UXlyze | Bridging the Gap Between Design & Reality');
+@endphp
+
 <x-guest-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800  leading-tight">
@@ -10,8 +15,8 @@
             <div class="bg-white shadow-lg rounded-2xl overflow-hidden">
                 <div class="p-8">
                     <h2 class="text-3xl font-bold text-gray-900 mb-6">Create a New Blog Post</h2>
-                    <form action="{{ route('blogs.store') }}" method="POST" enctype="multipart/form-data"
-                        class="space-y-6">
+                    <form action="{{ route('blogs.store') }}" id="create-blog-form" method="POST"
+                        enctype="multipart/form-data" class="space-y-6">
                         @csrf
                         <div>
                             <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
@@ -38,7 +43,8 @@
 
                         <div>
                             <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
-                            <textarea id="content" name="content" rows="10"></textarea>
+                            <div id="editor" class="mt-1"></div>
+                            <input type="hidden" name="content" id="content" value="">
                             <x-input-error :messages="$errors->get('content')" class="mt-2" />
                         </div>
 
@@ -68,7 +74,7 @@
                         </div>
 
                         <div class="flex items-center justify-end">
-                            <button type="submit"
+                            <button type="submit" id="create-blog-button"
                                 class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
                                 Create Blog Post
                             </button>
@@ -79,17 +85,109 @@
         </div>
     </div>
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+        <!-- Include the Quill library -->
+        <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+        {{-- include jQuery --}}
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const easyMDE = new EasyMDE({
-                    element: document.getElementById('content')
+            const toolbarOptions = [
+                ['bold', 'italic', 'underline', 'strike'], // toggled buttons
+                ['blockquote', 'code-block'],
+                ['link', 'image', 'video', 'formula'],
+
+                [{
+                    'header': 1
+                }, {
+                    'header': 2
+                }], // custom button values
+                [{
+                    'list': 'ordered'
+                }, {
+                    'list': 'bullet'
+                }, {
+                    'list': 'check'
+                }],
+                [{
+                    'script': 'sub'
+                }, {
+                    'script': 'super'
+                }], // superscript/subscript
+                [{
+                    'indent': '-1'
+                }, {
+                    'indent': '+1'
+                }], // outdent/indent
+                [{
+                    'direction': 'rtl'
+                }], // text direction
+
+                [{
+                    'size': ['small', false, 'large', 'huge']
+                }], // custom dropdown
+                [{
+                    'header': [1, 2, 3, 4, 5, 6, false]
+                }],
+
+                [{
+                    'color': []
+                }, {
+                    'background': []
+                }], // dropdown with defaults from theme
+                [{
+                    'font': []
+                }],
+                [{
+                    'align': []
+                }],
+
+                ['clean'] // remove formatting button
+            ];
+
+
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: toolbarOptions
+                }
+            });
+
+            $('#create-blog-form').on('submit', function(e) {
+                e.preventDefault();
+                const content = quill.root.innerHTML;
+                var formData = new FormData(this);
+                formData.append('content', content);
+
+                const action = $(this).attr('action');
+                const button = $('#create-blog-button');
+                button.prop('disabled', true);
+                button.text('Creating...');
+                $.ajax({
+                    url: action,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        console.log(response);
+                        alert('Blog post created successfully');
+                        button.prop('disabled', false);
+                        button.text('Create Blog Post');
+                    },
+                    error: function(response) {
+                        console.log(response);
+                        alert('Blog post creation failed');
+                        button.prop('disabled', false);
+                        button.text('Create Blog Post');
+                    }
                 });
             });
         </script>
     @endpush
 
     @push('styles')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+        <!-- Include stylesheet -->
+        <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
     @endpush
 </x-guest-layout>

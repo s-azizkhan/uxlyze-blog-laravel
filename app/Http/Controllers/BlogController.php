@@ -12,7 +12,7 @@ class BlogController extends Controller
      */
     public function index()
     {
-        $blogs = Blog::where('blog_status', 'published')->get();
+        $blogs = Blog::where('blog_status', 'published')->orderBy('created_at', 'desc')->get();
         return view('blogs.index', compact('blogs'));
     }
 

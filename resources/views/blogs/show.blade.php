@@ -4,6 +4,8 @@
         ->title($blog->title . ' | UXlyze | Bridging the Gap Between Design & Reality')
         ->description($blog->desc ?? Str::limit(strip_tags($blog->content), 160))
         ->image($blog->image ? asset('storage/' . $blog->image) : '');
+
+    $parsedContent = Str::markdown($blog->content);
 @endphp
 
 <x-guest-layout>
@@ -35,7 +37,7 @@
                         <span>{{ $blog->category }}</span>
                     </div>
                     <div class="prose max-w-none text-secondary">
-                        {!! Str::markdown($blog->content) !!}
+                        {!! $parsedContent !!}
                     </div>
                 </div>
             </div>
